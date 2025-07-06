@@ -1,0 +1,23 @@
+@import 'tailwindcss';
+@plugin '@tailwindcss/forms';
+
+body {
+    @apply bg-neutral-50 text-neutral-800 dark:bg-neutral-950 dark:text-neutral-100;
+}
+
+input {
+    @apply bg-white dark:bg-neutral-900 border dark:border-neutral-800 rounded-md;
+}
+
+.btn {
+    @apply px-4 py-2 rounded-md text-center cursor-pointer transition-colors duration-100 ease-in-out;
+}
+.btn-primary {
+    @apply bg-neutral-900 text-gray-200 border border-neutral-900 hover:bg-stone-700 dark:hover:bg-stone-800;
+}
+.btn-primary:disabled {
+    @apply bg-gray-200 text-gray-400 border border-gray-300;
+}
+.btn-primary-outline {
+    @apply bg-transparent text-gray-900 border border-gray-900 hover:bg-gray-300 dark:border-neutral-800 dark:text-neutral-100;
+}
