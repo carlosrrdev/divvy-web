@@ -73,23 +73,23 @@
             </button>
         </div>
     </form>
-    <div class="border border-neutral-300 rounded-md lg:hidden">
+    <div class="border border-neutral-300 dark:border-neutral-800 rounded-md lg:hidden">
         <div class="flex">
             <button onclick={() => {
                 expensesListShowing = true;
                 membersListShowing = false;
-            }} class={`flex-1 p-1 rounded-tl-sm cursor-pointer ${expensesListShowing? "bg-neutral-200": "bg-neutral-300"}`}>Expenses
+            }} class={`btn-toggle rounded-tl-sm ${expensesListShowing? "btn-toggle-active": "btn-toggle-inactive"}`}>Expenses
             </button>
             <button onclick={() => {
                 expensesListShowing = false;
                 membersListShowing = true;
-            }} class={`flex-1 p-1 rounded-tr-sm cursor-pointer ${membersListShowing? "bg-neutral-200": "bg-neutral-300"}`}>Members
+            }} class={`btn-toggle rounded-tr-sm ${membersListShowing? "btn-toggle-active": "btn-toggle-inactive"}`}>Members
             </button>
         </div>
         {#if expensesListShowing}
             <ul class="flex flex-col gap-y-2">
                 {#each expenses as expense (expense.expId)}
-                    <li class="flex p-2 border-b border-neutral-300 gap-x-2 items-center">
+                    <li class="list-item gap-x-2 items-center">
                         <span class="text-sm">{expense.expName}</span>
                         <span class="text-sm ml-auto">${expense.expAmount}</span>
                         <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4">
@@ -102,7 +102,7 @@
         {#if membersListShowing}
             <ul class="flex flex-col gap-y-2">
                 {#each members as member (member.memId)}
-                    <li class="flex p-2 border-b border-neutral-300 justify-between gap-x-2 items-center">
+                    <li class="list-item justify-between gap-x-2 items-center">
                         <span class="text-sm">{member.memName}</span>
                         <button onclick={() => handleDeleteMember(member.memId)}>
                             <TrashIcon class="text-lg"/>
@@ -115,7 +115,7 @@
     <div class="hidden lg:grid grid-cols-2 gap-x-8">
         <ul class="flex flex-col gap-y-2">
             {#each expenses as expense (expense.expId)}
-                <li class="flex p-2 border-b border-neutral-300 gap-x-2 items-center">
+                <li class="list-item gap-x-2 items-center">
                     <span class="text-sm">{expense.expName}</span>
                     <span class="text-sm ml-auto">${expense.expAmount}</span>
                     <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4">
@@ -126,7 +126,7 @@
         </ul>
         <ul class="flex flex-col gap-y-2">
             {#each members as member (member.memId)}
-                <li class="flex p-2 border-b border-neutral-300 justify-between gap-x-2 items-center">
+                <li class="list-item justify-between gap-x-2 items-center">
                     <span class="text-sm">{member.memName}</span>
                     <button onclick={() => handleDeleteMember(member.memId)}>
                         <TrashIcon class="text-lg"/>
