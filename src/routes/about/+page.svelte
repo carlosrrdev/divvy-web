@@ -1,9 +1,72 @@
-<script>
+<script lang="ts">
+    import {onMount} from "svelte";
+    import mermaid from 'mermaid';
 
+    let diagram1: string = `
+      graph TD
+        A([Expense 1]) --> D
+        B([Expense 2]) --> D
+        C([Expense 3]) --> D
+
+        D{{<strong>Split evenly</strong> <br/> <pre>Total expenses/Total members</pre>}}
+
+        D --> G([Member 1])
+        D --> H([Member 2])
+        D --> I([Member 3])
+        D --> J([Member 4])
+        D --> K([Member 5])
+    `;
+
+    let diagram2: string = `
+    graph LR
+    %% Expenses
+    E1([Expense 1]) --> ED1
+    E2([Expense 2]) --> ED2
+    E3([Expense 3]) --> ED3
+
+    %% Distribution nodes
+    ED1{{Expense 1 Distribution}}
+    ED2{{Expense 2 Distribution}}
+    ED3{{Expense 3 Distribution}}
+
+    %% Members
+    M1([Member 1])
+    M2([Member 2])
+    M3([Member 3])
+    M4([Member 4])
+    M5([Member 5])
+
+    %% Expense 1 Distribution
+    ED1 --> M1
+    ED1 --> M3
+    ED1 --> M5
+    ED1 --> M4
+
+    %% Expense 2 Distribution
+    ED2 --> M4
+
+    %% Expense 3 Distribution
+    ED3 --> M2
+    ED3 --> M4
+`;
+
+    let diagramContainer1;
+    let diagramContainer2;
+
+    async function renderDiagram(diagram: string, container, id: string) {
+        const {svg} = await mermaid.render(id, diagram);
+        container!.innerHTML = svg;
+    }
+
+    onMount(async () => {
+        mermaid.initialize({ startOnLoad: false, theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'neutral' });
+        await renderDiagram(diagram1, diagramContainer1, 'mermaid-diagram1');
+        await renderDiagram(diagram2, diagramContainer2, 'mermaid-diagram2');
+    })
 </script>
 <div class="py-12 flex flex-col gap-y-8">
     <h1 class="font-bold text-[clamp(2rem,5vw,3.5rem)]">About Divvy</h1>
-    <div class="max-w-screen-md flex flex-col gap-y-8">
+    <div class="max-w-screen-lg flex flex-col gap-y-8">
         <p class="leading-relaxed">
             Divvy is a, quite simply, an expense splitting application. However. There are a few key features
             that make Divvy stand out. Let's go over them now.
@@ -16,6 +79,9 @@
                 <em>Divvy up</em> expenses. This means that specifically assign expenses to each member and Divvy will
                 handle the rest. Intelligently calculating expenses based on the number of people assigned to each.
             </p>
+            <div class="mt-8" bind:this={diagramContainer1}></div>
+            <hr class="my-8 opacity-20" />
+            <div class="mt-8" bind:this={diagramContainer2}></div>
         </section>
         <section>
             <h2 class="font-bold text-[clamp(1rem,5vw,1.5rem)] text-amber-500">Reports and Data</h2>
