@@ -1,19 +1,19 @@
 <script lang="ts">
     let {showing = $bindable(), header, content} = $props();
-    
+
     let modalElement: HTMLElement | undefined = $state();
     let previouslyFocusedElement: HTMLElement | null = null;
     let focusableElements: HTMLElement[] = [];
-    
-    import { onMount } from 'svelte';
-    
+
+    import {onMount} from 'svelte';
+
     // Store the element that had focus before the modal opened
     onMount(() => {
         if (typeof document !== 'undefined') {
             previouslyFocusedElement = document.activeElement as HTMLElement;
         }
     });
-    
+
     // This effect runs whenever showing or modalElement changes
     $effect(() => {
         if (showing && modalElement) {
@@ -23,7 +23,7 @@
                     'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
                 )
             ) as HTMLElement[];
-            
+
             // Focus the first focusable element in the modal
             if (focusableElements.length > 0) {
                 setTimeout(() => {
@@ -53,20 +53,20 @@
         if (event.key === 'Escape') {
             closeModal();
         }
-        
+
         // Only handle Tab key events when the modal is open
         if (showing && event.key === 'Tab') {
             // If there are no focusable elements, do nothing
             if (focusableElements.length === 0) return;
-            
+
             const firstFocusableElement = focusableElements[0];
             const lastFocusableElement = focusableElements[focusableElements.length - 1];
-            
+
             // If shift + tab and focus is on first element, move to last element
             if (event.shiftKey && document.activeElement === firstFocusableElement) {
                 lastFocusableElement.focus();
                 event.preventDefault();
-            } 
+            }
             // If tab and focus is on last element, move to first element
             else if (!event.shiftKey && document.activeElement === lastFocusableElement) {
                 firstFocusableElement.focus();
@@ -78,7 +78,7 @@
 
 <style>
     .modal-body {
-        animation: modal-fade-in 350ms cubic-bezier(.31,.02,.08,.96);
+        animation: modal-fade-in 350ms cubic-bezier(.31, .02, .08, .96);
     }
 
     @keyframes modal-fade-in {
@@ -97,7 +97,7 @@
 
 {#if showing}
     <div
-            class="fixed inset-0 bg-stone-700/50 dark:bg-slate-900/60 flex items-center p-6 justify-center z-40"
+            class="fixed inset-0 bg-stone-700/50 dark:bg-neutral-950/70 flex items-center p-6 justify-center z-40"
             onclick={handleBackdropClick}
             tabindex="-1"
             role="dialog"
@@ -106,7 +106,7 @@
             bind:this={modalElement}
             onkeydown={handleKeyDown}
     >
-        <div class="modal-body bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl max-w-lg w-full">
+        <div class="modal-body p-6 rounded-lg shadow-xl max-w-lg w-full">
             <div class="flex justify-between items-center mb-4">
                 {@render header()}
                 <button

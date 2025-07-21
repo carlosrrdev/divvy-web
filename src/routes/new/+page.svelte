@@ -81,15 +81,15 @@
             </button>
         </div>
     </form>
-    <div class="grid grid-rows-[auto_1fr] gap-y-1 border border-stone-800 dark:border-teal-700
+    <div class="grid grid-rows-[auto_1fr] gap-y-1 border border-outline
     rounded-sm lg:hidden">
-        <div class="grid grid-cols-[1fr_1px_1fr] border-b border-stone-800 dark:border-teal-700">
+        <div class="grid grid-cols-[1fr_1px_1fr] border-b border-outline">
             <button onclick={() => {
                 expensesListShowing = true;
                 membersListShowing = false;
             }} class={`btn-toggle rounded-tl-sm ${expensesListShowing? "btn-toggle-active": ""}`}>Expenses
             </button>
-            <div class="bg-stone-800 dark:bg-teal-700"></div>
+            <div class="bg-stone-800 dark:bg-indigo-400/30"></div>
             <button onclick={() => {
                 expensesListShowing = false;
                 membersListShowing = true;
