@@ -8,7 +8,7 @@
         B([Expense 2]) --> D
         C([Expense 3]) --> D
 
-        D{{<strong>Split evenly</strong> <br/> <pre>Total expenses/Total members</pre>}}
+        D("$$\\frac{Total expenses}{Total members}$$")
 
         D --> G([Member 1])
         D --> H([Member 2])
@@ -20,46 +20,49 @@
     let diagram2: string = `
     graph LR
     %% Expenses
-    E1([Expense 1]) --> ED1
-    E2([Expense 2]) --> ED2
-    E3([Expense 3]) --> ED3
+    E1([Expense 1])
+    E2([Expense 2])
+    E3([Expense 3])
 
-    %% Distribution nodes
-    ED1{{Expense 1 Distribution}}
-    ED2{{Expense 2 Distribution}}
-    ED3{{Expense 3 Distribution}}
+    subgraph Expense distributions
+    R1["<em>Expense 1\nExpense 3</em>"]
+    R2["<em>Expense 3</em>"]
+    R3["<em>Expense 1\nExpense 2</em>"]
+    R4["<em>Expense 1\nExpense 2\nExpense 3</em>"]
+    R5["<em>Expense 1</em>"]
+    end
 
-    %% Members
-    M1([Member 1])
-    M2([Member 2])
-    M3([Member 3])
-    M4([Member 4])
-    M5([Member 5])
+    M1([Member 1]) --> R1
+    M2([Member 2]) --> R2
+    M3([Member 3]) --> R3
+    M4([Member 4]) --> R4
+    M5([Member 5]) --> R5
 
-    %% Expense 1 Distribution
-    ED1 --> M1
-    ED1 --> M3
-    ED1 --> M5
-    ED1 --> M4
+    E1 --> M1
+    E1 --> M3
+    E1 --> M5
+    E1 --> M4
 
     %% Expense 2 Distribution
-    ED2 --> M4
+    E2 --> M4
+    E2 --> M3
 
     %% Expense 3 Distribution
-    ED3 --> M2
-    ED3 --> M4
+    E3 --> M2
+    E3 --> M4
+    E3 --> M1
 `;
 
-    let diagramContainer1;
-    let diagramContainer2;
+    let diagramContainer1: HTMLDivElement | null = null;
+    let diagramContainer2: HTMLDivElement | null = null;
 
-    async function renderDiagram(diagram: string, container, id: string) {
+    async function renderDiagram(diagram: string, container: HTMLDivElement | null, id: string) {
         const {svg} = await mermaid.render(id, diagram);
         container!.innerHTML = svg;
     }
 
     onMount(async () => {
-        mermaid.initialize({ startOnLoad: false, theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'neutral' });
+        mermaid.initialize({ startOnLoad: false, look: "handDrawn", theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'base' });
         await renderDiagram(diagram1, diagramContainer1, 'mermaid-diagram1');
         await renderDiagram(diagram2, diagramContainer2, 'mermaid-diagram2');
     })
@@ -74,13 +77,19 @@
         <section>
             <h2 class="font-bold text-[clamp(1rem,5vw,1.5rem)] text-amber-500">Split or Divvy up</h2>
             <p class="leading-relaxed">
-                It is very easy to tally up expenses and divide them up equally between a specific number of people.
-                Indeed, Divvy excels at this task. However, the true power of Divvy comes when you decide to
-                <em>Divvy up</em> expenses. This means that specifically assign expenses to each member and Divvy will
-                handle the rest. Intelligently calculating expenses based on the number of people assigned to each.
+                There are two primary ways to use Divvy. You can <strong>Split Evenly</strong> or
+                <strong>Divvy Up</strong>. Lets take a look at each of these options.
             </p>
-            <div class="mt-8" bind:this={diagramContainer1}></div>
-            <hr class="my-8 opacity-20" />
+            <p class="leading-relaxed">
+                Splitting evenly is the simplest Divvy. It is simply all expenses tallied up and then divided evenly
+                between all members. That's it!
+            </p>
+            <div class="my-8" bind:this={diagramContainer1}></div>
+            <p class="leading-relaxed">
+                Divvy up is more complex. Expenses are divvied up between participating members. Not all members
+                contribute to each expense equally, or at all. Members will have specific expenses assigned to them and
+                results will factor in the total of the expenses divided by number of participating members.
+            </p>
             <div class="mt-8" bind:this={diagramContainer2}></div>
         </section>
         <section>

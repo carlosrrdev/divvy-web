@@ -2,36 +2,82 @@
 @plugin '@tailwindcss/forms';
 
 body {
-    @apply bg-neutral-50 text-neutral-800 dark:bg-neutral-950 dark:text-gray-400;
+    font-family: "Open Sans", system-ui, -apple-system, sans-serif;
+    font-optical-sizing: auto;
+    font-weight: normal;
+    @apply bg-white text-neutral-800 dark:bg-black dark:text-slate-300;
 }
 
 input {
-    @apply bg-white dark:bg-neutral-900 border dark:border-neutral-800 rounded-md;
+    @apply bg-stone-100 border border-stone-800 dark:bg-slate-800/80 dark:border-teal-700 rounded-sm;
 }
 
 .btn {
-    @apply px-4 py-2 rounded-md text-center cursor-pointer transition-colors duration-100 ease-in-out;
+    @apply px-4 py-2 rounded-sm text-center cursor-pointer transition-colors duration-100 ease-in-out;
+}
+.btn-lg {
+    @apply px-5 py-3 md:px-6 md:py-3 md:text-lg;
 }
 .btn-primary {
-    @apply bg-neutral-900 text-gray-300 border border-neutral-900 hover:bg-gray-700 dark:hover:bg-gray-800;
+    @apply bg-stone-800 text-amber-100 hover:bg-stone-950 dark:bg-teal-600 dark:hover:bg-teal-700
+    dark:text-sky-100;
 }
 .btn-primary:disabled {
-    @apply bg-gray-200 text-gray-400 border border-gray-300 cursor-not-allowed dark:bg-neutral-800
-    dark:border-neutral-700;
+    @apply bg-stone-300 text-stone-400 dark:bg-slate-700 dark:text-slate-500;
 }
 .btn-primary-outline {
-    @apply bg-transparent text-gray-900 border border-gray-900 hover:bg-gray-300 dark:hover:bg-neutral-900
-    dark:border-neutral-800 dark:text-gray-400;
+    @apply bg-transparent border border-stone-800 hover:bg-stone-200 dark:hover:bg-slate-800
+    dark:border-teal-700;
 }
 .btn-toggle {
-    @apply flex-1 p-1 cursor-pointer;
+    @apply flex-1 p-1 cursor-pointer bg-amber-50 dark:bg-slate-800;
 }
 .btn-toggle-active {
-    @apply bg-gray-200 dark:bg-neutral-800;
+    @apply bg-amber-100 dark:bg-slate-700;
 }
-.btn-toggle-inactive {
-    @apply bg-gray-100 dark:bg-neutral-900;
+.btn-trash {
+    @apply cursor-pointer hover:text-rose-300;
 }
 .list-item {
-    @apply flex p-2 border-b border-neutral-300 dark:border-neutral-800;
+    animation-name: list-item-enter-in;
+    animation-duration: 0.5s;
+    animation-timing-function: cubic-bezier(.37,.04,.13,.99);
+    animation-fill-mode: both;
+    @apply flex p-2 border-b border-stone-300 dark:border-teal-700 last:border-b-transparent;
+}
+
+.modal-body {
+    @apply  bg-stone-100 dark:bg-slate-700 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto
+    shadow-lg;
+}
+
+.toast-success {
+    @apply bg-emerald-50 border-emerald-100 text-emerald-800 dark:bg-teal-700 dark:border-teal-500
+    dark:text-sky-200;
+}
+
+.toast-error {
+    @apply bg-rose-100 border-rose-500 text-rose-800 dark:bg-rose-900/30 dark:border-rose-700
+    dark:text-rose-400;
+}
+
+.toast-warning {
+    @apply bg-amber-100 border-amber-500 text-amber-800 dark:bg-amber-900/30 dark:border-amber-700
+    dark:text-amber-400;
+}
+
+.toast-info {
+    @apply bg-blue-100 border-blue-500 text-blue-800 dark:bg-blue-900/30 dark:border-blue-700
+    dark:text-blue-400;
+}
+
+@keyframes list-item-enter-in {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

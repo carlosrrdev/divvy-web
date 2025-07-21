@@ -2,11 +2,12 @@
     import '../app.css';
     import MenuIcon from '$lib/components/MenuIcon.svelte';
     import SettingsIcon from '$lib/components/SettingsIcon.svelte';
+    import Toast from '$lib/components/Toast.svelte';
 
     let { children } = $props();
 </script>
 
-<div class="w-screen min-h-dvh flex flex-col lg:gap-y-8">
+<div class="w-screen min-h-dvh flex flex-col lg:gap-y-8 bg-amber-200/5 dark:bg-sky-900/30">
     <header class="flex w-full max-w-screen-lg mx-auto">
         <nav class="flex-1 flex justify-between items-center p-6">
             <MenuIcon class="text-2xl" />
@@ -27,3 +28,4 @@
         </div>
     </footer>
 </div>
+<Toast />

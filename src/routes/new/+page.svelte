@@ -1,5 +1,6 @@
 <script lang="ts">
     import Modal from '$lib/components/Modal.svelte';
+    import {toasts} from "$lib/stores/toast";
     import TrashIcon from "$lib/components/TrashIcon.svelte";
 
     let expensesModalShowing = $state(false);
@@ -26,6 +27,7 @@
                 expName: expenseName,
                 expAmount: parseFloat(expenseAmountString)
             });
+            toasts.success(`${expenseName} added as expense`);
             expenseName = '';
             expenseAmountString = '';
             expenseNameInput.focus();
@@ -43,6 +45,7 @@
                 memId: crypto.randomUUID(),
                 memName: memberName
             })
+            toasts.success(`${memberName} added as member`);
             memberName = '';
             memberNameInput.focus();
         }
@@ -52,6 +55,10 @@
         members = members.filter(member => member.memId !== memberId);
     }
 </script>
+
+<svelte:head>
+    <title>Divvy | New Divvy</title>
+</svelte:head>
 
 <div class="flex-1 grid grid-rows-[auto_auto_1fr_auto] gap-y-4 lg:gap-y-12">
     <p class="font-bold text-lg">Creating new divvy</p>
@@ -69,30 +76,33 @@
             <button type="button" onclick={() => expensesModalShowing = true} class="btn w-full btn-primary-outline">Add
                 expenses
             </button>
-            <button type="button" onclick={() => membersModalShowing = true} class="btn w-full btn-primary-outline">Add members
+            <button type="button" onclick={() => membersModalShowing = true} class="btn w-full btn-primary-outline">Add
+                members
             </button>
         </div>
     </form>
-    <div class="border border-neutral-300 dark:border-neutral-800 rounded-md lg:hidden">
-        <div class="flex">
+    <div class="grid grid-rows-[auto_1fr] gap-y-1 border border-stone-800 dark:border-teal-700
+    rounded-sm lg:hidden">
+        <div class="grid grid-cols-[1fr_1px_1fr] border-b border-stone-800 dark:border-teal-700">
             <button onclick={() => {
                 expensesListShowing = true;
                 membersListShowing = false;
-            }} class={`btn-toggle rounded-tl-sm ${expensesListShowing? "btn-toggle-active": "btn-toggle-inactive"}`}>Expenses
+            }} class={`btn-toggle rounded-tl-sm ${expensesListShowing? "btn-toggle-active": ""}`}>Expenses
             </button>
+            <div class="bg-stone-800 dark:bg-teal-700"></div>
             <button onclick={() => {
                 expensesListShowing = false;
                 membersListShowing = true;
-            }} class={`btn-toggle rounded-tr-sm ${membersListShowing? "btn-toggle-active": "btn-toggle-inactive"}`}>Members
+            }} class={`btn-toggle rounded-tr-sm ${membersListShowing? "btn-toggle-active": ""}`}>Members
             </button>
         </div>
         {#if expensesListShowing}
-            <ul class="flex flex-col gap-y-2">
-                {#each expenses as expense (expense.expId)}
-                    <li class="list-item gap-x-2 items-center">
+            <ul class="flex flex-col gap-y-2 overflow-y-auto">
+                {#each expenses as expense, index (expense.expId)}
+                    <li class="list-item gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
                         <span class="text-sm">{expense.expName}</span>
                         <span class="text-sm ml-auto">${expense.expAmount}</span>
-                        <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4">
+                        <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4 btn-trash">
                             <TrashIcon class="text-lg"/>
                         </button>
                     </li>
@@ -101,10 +111,10 @@
         {/if}
         {#if membersListShowing}
             <ul class="flex flex-col gap-y-2">
-                {#each members as member (member.memId)}
-                    <li class="list-item justify-between gap-x-2 items-center">
+                {#each members as member, index (member.memId)}
+                    <li class="list-item justify-between gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
                         <span class="text-sm">{member.memName}</span>
-                        <button onclick={() => handleDeleteMember(member.memId)}>
+                        <button onclick={() => handleDeleteMember(member.memId)} class="btn-trash">
                             <TrashIcon class="text-lg"/>
                         </button>
                     </li>
@@ -114,21 +124,21 @@
     </div>
     <div class="hidden lg:grid grid-cols-2 gap-x-8">
         <ul class="flex flex-col gap-y-2">
-            {#each expenses as expense (expense.expId)}
-                <li class="list-item gap-x-2 items-center">
+            {#each expenses as expense, index (expense.expId)}
+                <li class="list-item gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
                     <span class="text-sm">{expense.expName}</span>
                     <span class="text-sm ml-auto">${expense.expAmount}</span>
-                    <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4">
+                    <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4 btn-trash">
                         <TrashIcon class="text-lg"/>
                     </button>
                 </li>
             {/each}
         </ul>
         <ul class="flex flex-col gap-y-2">
-            {#each members as member (member.memId)}
-                <li class="list-item justify-between gap-x-2 items-center">
+            {#each members as member, index (member.memId)}
+                <li class="list-item justify-between gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
                     <span class="text-sm">{member.memName}</span>
-                    <button onclick={() => handleDeleteMember(member.memId)}>
+                    <button onclick={() => handleDeleteMember(member.memId)} class="btn-trash">
                         <TrashIcon class="text-lg"/>
                     </button>
                 </li>
@@ -136,47 +146,50 @@
         </ul>
     </div>
     <div class="flex gap-x-2 lg:gap-x-8">
-        <button disabled={expenses.length < 1 || members.length <=1} class="btn btn-primary flex-1">Split evenly</button>
+        <button disabled={expenses.length < 1 || members.length <=1} class="btn btn-primary flex-1">Split evenly
+        </button>
         <button disabled={expenses.length <=1 || members.length <=1} class="btn btn-primary flex-1">Divvy up</button>
     </div>
 </div>
 
 <Modal bind:showing={expensesModalShowing}>
-    <svelte:fragment slot="header">
+    {#snippet header()}
         <h2 class="text-xl font-bold">Add Expenses</h2>
-    </svelte:fragment>
-
-    <div class="flex flex-col gap-y-4">
-        <form class="flex flex-col gap-y-4" onsubmit={handleSaveExpense}>
-            <fieldset class="flex flex-col gap-y-1">
-                <label class="text-sm opacity-80" for="expense-name">Expense name</label>
-                <input type="text" id="expense-name" bind:value={expenseName} bind:this={expenseNameInput} required
-                       placeholder="Enter expense name">
-            </fieldset>
-            <fieldset class="flex flex-col gap-y-1">
-                <label class="text-sm opacity-80" for="expense-amount">Expense amount</label>
-                <input type="number" id="expense-amount" bind:value={expenseAmountString} step="0.01" required
-                       placeholder="Enter expense amount">
-            </fieldset>
-            <button type="submit" class="btn btn-primary">Save Expenses</button>
-        </form>
-    </div>
+    {/snippet}
+    {#snippet content()}
+        <div class="flex flex-col gap-y-4">
+            <form class="flex flex-col gap-y-4" onsubmit={handleSaveExpense}>
+                <fieldset class="flex flex-col gap-y-1">
+                    <label class="text-sm opacity-80" for="expense-name">Expense name</label>
+                    <input type="text" id="expense-name" bind:value={expenseName} bind:this={expenseNameInput} required
+                           placeholder="Enter expense name">
+                </fieldset>
+                <fieldset class="flex flex-col gap-y-1">
+                    <label class="text-sm opacity-80" for="expense-amount">Expense amount</label>
+                    <input type="number" id="expense-amount" bind:value={expenseAmountString} step="0.01" required
+                           placeholder="Enter expense amount">
+                </fieldset>
+                <button type="submit" class="btn btn-primary">Save Expenses</button>
+            </form>
+        </div>
+    {/snippet}
 </Modal>
 
 <!-- Members Modal -->
 <Modal bind:showing={membersModalShowing}>
-    <svelte:fragment slot="header">
+    {#snippet header()}
         <h2 class="text-xl font-bold">Add Members</h2>
-    </svelte:fragment>
-
-    <div class="flex flex-col gap-y-4">
-        <form class="flex flex-col gap-y-4" onsubmit={handleSaveMember}>
-            <fieldset class="flex flex-col gap-y-1">
-                <label class="text-sm opacity-80" for="member-name">Member name</label>
-                <input type="text" id="member-name" bind:value={memberName} bind:this={memberNameInput} required
-                       placeholder="Enter member name">
-            </fieldset>
-            <button type="submit" class="btn btn-primary">Save member</button>
-        </form>
-    </div>
+    {/snippet}
+    {#snippet content()}
+        <div class="flex flex-col gap-y-4">
+            <form class="flex flex-col gap-y-4" onsubmit={handleSaveMember}>
+                <fieldset class="flex flex-col gap-y-1">
+                    <label class="text-sm opacity-80" for="member-name">Member name</label>
+                    <input type="text" id="member-name" bind:value={memberName} bind:this={memberNameInput} required
+                           placeholder="Enter member name">
+                </fieldset>
+                <button type="submit" class="btn btn-primary">Save member</button>
+            </form>
+        </div>
+    {/snippet}
 </Modal>

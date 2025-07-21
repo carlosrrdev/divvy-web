@@ -1,5 +1,43 @@
 <script lang="ts">
-    export let showing = false;
+    let {showing = $bindable(), header, content} = $props();
+    
+    let modalElement: HTMLElement | undefined = $state();
+    let previouslyFocusedElement: HTMLElement | null = null;
+    let focusableElements: HTMLElement[] = [];
+    
+    import { onMount } from 'svelte';
+    
+    // Store the element that had focus before the modal opened
+    onMount(() => {
+        if (typeof document !== 'undefined') {
+            previouslyFocusedElement = document.activeElement as HTMLElement;
+        }
+    });
+    
+    // This effect runs whenever showing or modalElement changes
+    $effect(() => {
+        if (showing && modalElement) {
+            // Get all focusable elements within the modal
+            focusableElements = Array.from(
+                modalElement.querySelectorAll(
+                    'a[href], button:not([disabled]), textarea:not([disabled]), input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
+                )
+            ) as HTMLElement[];
+            
+            // Focus the first focusable element in the modal
+            if (focusableElements.length > 0) {
+                setTimeout(() => {
+                    focusableElements[0].focus();
+                }, 50);
+            } else {
+                // If no focusable elements, focus the modal itself
+                modalElement.focus();
+            }
+        } else if (!showing && previouslyFocusedElement) {
+            // Return focus to the previously focused element when the modal closes
+            previouslyFocusedElement.focus();
+        }
+    });
 
     function closeModal() {
         showing = false;
@@ -14,6 +52,26 @@
     function handleKeyDown(event: KeyboardEvent) {
         if (event.key === 'Escape') {
             closeModal();
+        }
+        
+        // Only handle Tab key events when the modal is open
+        if (showing && event.key === 'Tab') {
+            // If there are no focusable elements, do nothing
+            if (focusableElements.length === 0) return;
+            
+            const firstFocusableElement = focusableElements[0];
+            const lastFocusableElement = focusableElements[focusableElements.length - 1];
+            
+            // If shift + tab and focus is on first element, move to last element
+            if (event.shiftKey && document.activeElement === firstFocusableElement) {
+                lastFocusableElement.focus();
+                event.preventDefault();
+            } 
+            // If tab and focus is on last element, move to first element
+            else if (!event.shiftKey && document.activeElement === lastFocusableElement) {
+                firstFocusableElement.focus();
+                event.preventDefault();
+            }
         }
     }
 </script>
@@ -35,22 +93,22 @@
     }
 </style>
 
-<svelte:window on:keydown={handleKeyDown}/>
+<!--<svelte:window on:keydown={handleKeyDown}/>-->
 
 {#if showing}
     <div
-            class="fixed inset-0 bg-black/40 dark:bg-neutral-900/60 flex items-center p-6 justify-center z-50"
-            onclick={handleBackdropClick} onkeydown={(e) => {
-            if (e.key === 'Escape') {
-                closeModal();
-            }
-        }} tabindex="-1" role="dialog" aria-modal="true" aria-labelledby="modal-title"
+            class="fixed inset-0 bg-stone-700/50 dark:bg-slate-900/60 flex items-center p-6 justify-center z-40"
+            onclick={handleBackdropClick}
+            tabindex="-1"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+            bind:this={modalElement}
+            onkeydown={handleKeyDown}
     >
-        <div class="modal-body bg-neutral-100 dark:bg-neutral-950 rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
+        <div class="modal-body bg-white dark:bg-slate-800 p-6 rounded-lg shadow-xl max-w-lg w-full">
             <div class="flex justify-between items-center mb-4">
-                <slot name="header">
-                    <h2 class="text-xl font-bold">Modal Title</h2>
-                </slot>
+                {@render header()}
                 <button
                         type="button"
                         class="text-gray-500 hover:text-rose-400 cursor-pointer"
@@ -61,18 +119,16 @@
                 </button>
             </div>
             <div class="modal-content">
-                <slot/>
+                {@render content()}
             </div>
             <div class="mt-6 flex justify-end gap-2">
-                <slot name="footer">
-                    <button
-                            type="button"
-                            class="btn btn-primary-outline"
-                            onclick={closeModal}
-                    >
-                        Close
-                    </button>
-                </slot>
+                <button
+                        type="button"
+                        class="btn btn-primary-outline"
+                        onclick={closeModal}
+                >
+                    Close
+                </button>
             </div>
         </div>
     </div>
