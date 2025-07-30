@@ -1,5 +1,5 @@
 <script lang="ts">
-    let {showing = $bindable(), header, content} = $props();
+    let {showing = $bindable(), header, content, footer = undefined} = $props();
 
     let modalElement: HTMLElement | undefined = $state();
     let previouslyFocusedElement: HTMLElement | null = null;
@@ -83,11 +83,11 @@
 
     @keyframes modal-fade-in {
         from {
-            opacity: 0;
+            /*opacity: 0;*/
             transform: translateY(10px);
         }
         to {
-            opacity: 1;
+            /*opacity: 1;*/
             transform: translateY(0);
         }
     }
@@ -97,7 +97,7 @@
 
 {#if showing}
     <div
-            class="fixed inset-0 bg-stone-700/50 dark:bg-neutral-950/70 flex items-center p-6 justify-center z-40"
+            class="fixed inset-0 modal-backdrop flex items-center p-6 justify-center z-40"
             onclick={handleBackdropClick}
             tabindex="-1"
             role="dialog"
@@ -111,7 +111,7 @@
                 {@render header()}
                 <button
                         type="button"
-                        class="text-gray-500 hover:text-rose-400 cursor-pointer"
+                        class="text-gray-500 hover:text-strawberry cursor-pointer"
                         onclick={closeModal}
                         aria-label="Close modal"
                 >
@@ -121,15 +121,19 @@
             <div class="modal-content">
                 {@render content()}
             </div>
-            <div class="mt-6 flex justify-end gap-2">
-                <button
-                        type="button"
-                        class="btn btn-primary-outline"
-                        onclick={closeModal}
-                >
-                    Close
-                </button>
-            </div>
+            {#if footer}
+                {@render footer()}
+            {:else}
+                <div class="mt-6 flex justify-end gap-2">
+                    <button
+                            type="button"
+                            class="btn btn-primary-outline"
+                            onclick={closeModal}
+                    >
+                        Close
+                    </button>
+                </div>
+            {/if}
         </div>
     </div>
 {/if}

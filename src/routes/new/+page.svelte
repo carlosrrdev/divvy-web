@@ -5,19 +5,33 @@
 
     let expensesModalShowing = $state(false);
     let membersModalShowing = $state(false);
+    let splitModalShowing = $state(false);
+    let divvyUpModalShowing = $state(false);
 
     let expensesListShowing = $state(true);
     let membersListShowing = $state(false);
 
     let expenses: Array<{ expId: string, expName: string, expAmount: number }> = $state([]);
     let members: Array<{ memId: string, memName: string }> = $state([]);
+    let splitResults: { total: number, splitTotal: number, splitMembersCount?: number } = $state({
+        total: 0,
+        splitTotal: 0
+    });
 
+    let divvyTitle = $state('');
+    let divvyTitleInput: HTMLInputElement;
     let expenseName = $state('');
     let expenseAmountString = $state('');
     let expenseNameInput: HTMLInputElement;
 
     let memberName = $state('');
     let memberNameInput: HTMLInputElement;
+
+    $effect(() => {
+        const total = Number(Math.round((expenses.reduce((acc, expense) => acc + expense.expAmount, 0)) * 100) / 100);
+        const splitTotal = members.length > 0 ? Math.ceil(total / members.length * 100) / 100 : 0;
+        splitResults = {total, splitTotal, splitMembersCount: members.length};
+    })
 
     function handleSaveExpense(event: Event) {
         event.preventDefault();
@@ -54,6 +68,17 @@
     function handleDeleteMember(memberId: string) {
         members = members.filter(member => member.memId !== memberId);
     }
+
+    function verifyDivvyTitle(): boolean {
+        if (divvyTitle.trim()) {
+            return true;
+        } else {
+            toasts.error('Divvy title is required');
+            divvyTitleInput.focus();
+            divvyTitleInput.classList.add('border-rose-400');
+            return false;
+        }
+    }
 </script>
 
 <svelte:head>
@@ -65,7 +90,8 @@
     <form action="" class="flex flex-col gap-y-4">
         <fieldset class="flex flex-col gap-y-1">
             <label class="text-sm opacity-80" for="divvy-title">Title (required)</label>
-            <input id="divvy-title" type="text" required placeholder="Untitled divvy">
+            <input id="divvy-title" type="text" required placeholder="Untitled divvy" bind:value={divvyTitle}
+                   bind:this={divvyTitleInput}>
         </fieldset>
         <div class="flex flex-col">
             <p class="font-bold text-lg">Add expenses and members</p>
@@ -89,7 +115,7 @@
                 membersListShowing = false;
             }} class={`btn-toggle rounded-tl-sm ${expensesListShowing? "btn-toggle-active": ""}`}>Expenses
             </button>
-            <div class="bg-stone-800 dark:bg-indigo-400/30"></div>
+            <div class="bg-grape"></div>
             <button onclick={() => {
                 expensesListShowing = false;
                 membersListShowing = true;
@@ -146,9 +172,14 @@
         </ul>
     </div>
     <div class="flex gap-x-2 lg:gap-x-8">
-        <button disabled={expenses.length < 1 || members.length <=1} class="btn btn-primary flex-1">Split evenly
+        <button onclick={() => verifyDivvyTitle()? splitModalShowing = true : splitModalShowing = false}
+                disabled={expenses.length < 1 || members.length <=1}
+                class="btn btn-primary flex-1">Split evenly
         </button>
-        <button disabled={expenses.length <=1 || members.length <=1} class="btn btn-primary flex-1">Divvy up</button>
+        <button onclick={() => verifyDivvyTitle()? divvyUpModalShowing = true : divvyUpModalShowing = false}
+                disabled={expenses.length <=1 || members.length <=1}
+                class="btn btn-primary flex-1">Divvy up
+        </button>
     </div>
 </div>
 
@@ -175,7 +206,6 @@
     {/snippet}
 </Modal>
 
-<!-- Members Modal -->
 <Modal bind:showing={membersModalShowing}>
     {#snippet header()}
         <h2 class="text-xl font-bold">Add Members</h2>
@@ -190,6 +220,27 @@
                 </fieldset>
                 <button type="submit" class="btn btn-primary">Save member</button>
             </form>
+        </div>
+    {/snippet}
+</Modal>
+
+<Modal bind:showing={splitModalShowing}>
+    {#snippet header()}
+        <h2 class="text-xl font-bold">Split Evenly</h2>
+    {/snippet}
+    {#snippet content()}
+        <div class="flex flex-col gap-y-4">
+            <small>Final report</small>
+            <div>
+                <p class="text-lime text-7xl tracking-tight">${splitResults.splitTotal}</p>
+                <small>Expenses total: ${splitResults.total} / Total members: {splitResults.splitMembersCount}</small>
+            </div>
+        </div>
+    {/snippet}
+    {#snippet footer()}
+        <div class="mt-4 flex justify-end gap-4">
+            <button class="btn btn-primary-outline">Download results</button>
+            <button class="btn btn-primary">Save results</button>
         </div>
     {/snippet}
 </Modal>

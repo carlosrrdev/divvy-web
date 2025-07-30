@@ -1,68 +1,100 @@
 @import 'tailwindcss';
+
 @plugin '@tailwindcss/forms';
+
+@theme {
+    --color-vanilla-lightest: #faf8f2;
+    --color-vanilla-lighter: #f8f5e9;
+    --color-vanilla: #F5F1DE;
+    --color-vanilla-darker: #e8e3cc;
+    --color-orange-lighter: #ee8f74;
+    --color-orange: #E07A5D;
+    --color-orange-darker: #c5684e;
+    --color-grape-lighter: #5b6183;
+    --color-grape: #3C405B;
+    --color-grape-darker: #30344d;
+    --color-grape-darkest: #171926;
+    --color-lime-lighter: #99cbb2;
+    --color-lime: #82B29A;
+    --color-lime-darker: #70a289;
+    --color-strawberry-lighter: #e87586;
+    --color-strawberry: #e05d71;
+    --color-strawberry-darker: #d94c61;
+}
 
 body {
     font-family: "Open Sans", system-ui, -apple-system, sans-serif;
     font-optical-sizing: auto;
     font-weight: normal;
-    @apply bg-white text-neutral-800 dark:bg-black dark:text-indigo-200;
+    @apply bg-white text-grape dark:bg-grape-darker dark:text-vanilla;
 }
 
 input {
-    @apply bg-stone-100 border border-stone-800 dark:bg-slate-900/80 dark:border-indigo-400/30 rounded-sm;
+    @apply rounded-sm bg-vanilla-lighter border border-grape dark:bg-grape dark:border-grape-lighter;
+}
+
+.layoyt-bg {
+    @apply bg-vanilla dark:bg-grape;
 }
 
 .btn {
     @apply px-4 py-2 rounded-sm text-center cursor-pointer transition-colors duration-100 ease-in-out;
 }
+
 .btn-lg {
-    @apply px-5 py-3 md:px-6 md:py-3 md:text-lg;
+    @apply px-5 py-3;
 }
+
 .btn-primary {
-    @apply bg-stone-800 text-amber-100 hover:bg-stone-950 dark:bg-amber-700 dark:hover:bg-amber-600
-    dark:text-sky-100;
+    @apply bg-orange hover:bg-orange-lighter text-vanilla;
 }
+
 .btn-primary:disabled {
-    @apply bg-stone-300 text-stone-400 dark:bg-indigo-400/20 dark:text-indigo-300/50;
+    @apply bg-orange-darker/20 text-grape-darker/30 dark:text-vanilla/30;
 }
+
 .btn-primary-outline {
-    @apply bg-transparent border border-stone-800 hover:bg-stone-200 dark:hover:bg-indigo-800/20
-    dark:border-indigo-400/30;
+    @apply bg-transparent border border-grape hover:bg-grape-lighter/20 dark:border-grape-lighter;
 }
+
 .btn-toggle {
-    @apply flex-1 p-1 cursor-pointer bg-amber-50 dark:bg-indigo-400/30;
+    @apply flex-1 p-1 cursor-pointer bg-lime-darker dark:text-grape-darker;
 }
+
 .btn-toggle-active {
-    @apply bg-amber-100 dark:bg-indigo-400/50;
+    @apply bg-lime-lighter;
 }
+
 .btn-trash {
-    @apply cursor-pointer hover:text-rose-300;
+    @apply cursor-pointer hover:text-strawberry;
 }
+
 .border-outline {
-    @apply border-stone-800 dark:border-indigo-400/30;
+    @apply border-grape dark:border-grape-lighter;
 }
+
 .list-item {
     animation-name: list-item-enter-in;
     animation-duration: 0.5s;
-    animation-timing-function: cubic-bezier(.37,.04,.13,.99);
+    animation-timing-function: cubic-bezier(.37, .04, .13, .99);
     animation-fill-mode: both;
-    @apply flex p-2 border-b border-stone-300 dark:border-indigo-400/30 last:border-b-transparent;
+    @apply flex p-2 border-b border-grape dark:border-grape-lighter last:border-b-transparent;
 }
 
+.modal-backdrop {
+    @apply bg-grape-darker/40 dark:bg-grape-darkest/70;
+}
 .modal-body {
-    /*background-color: #1a1b28;*/
-    @apply  bg-stone-100 dark:bg-[#1a1b28] rounded-lg p-6 max-w-md w-full max-h-[90vh] overflow-y-auto
+    @apply bg-vanilla-lightest dark:bg-grape-darker rounded-sm p-6 max-w-md w-full max-h-[90vh] overflow-y-auto
     shadow-lg;
 }
 
 .toast-success {
-    @apply bg-emerald-50 border-emerald-100 text-emerald-800 dark:bg-teal-700 dark:border-teal-500
-    dark:text-sky-200;
+    @apply bg-lime-lighter dark:bg-lime-darker text-grape-darker border-grape-darker;
 }
 
 .toast-error {
-    @apply bg-rose-100 border-rose-500 text-rose-800 dark:bg-rose-900/30 dark:border-rose-700
-    dark:text-rose-400;
+    @apply bg-strawberry-darker text-vanilla-lighter border-grape-darker;
 }
 
 .toast-warning {
