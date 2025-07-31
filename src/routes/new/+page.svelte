@@ -1,5 +1,6 @@
 <script lang="ts">
     import Modal from '$lib/components/Modal.svelte';
+    import type {Member, Expense, SplitDivvy} from "$lib/types";
     import {toasts} from "$lib/stores/toast";
     import TrashIcon from "$lib/components/TrashIcon.svelte";
 
@@ -11,11 +12,14 @@
     let expensesListShowing = $state(true);
     let membersListShowing = $state(false);
 
-    let expenses: Array<{ expId: string, expName: string, expAmount: number }> = $state([]);
-    let members: Array<{ memId: string, memName: string }> = $state([]);
-    let splitResults: { total: number, splitTotal: number, splitMembersCount?: number } = $state({
+    let expenses: Array<Expense> = $state([]);
+    let members: Array<Member> = $state([]);
+    let splitResults: SplitDivvy = $derived({
+        id: crypto.randomUUID(),
         total: 0,
-        splitTotal: 0
+        splitTotal: 0,
+        expenses: expenses,
+        members: members
     });
 
     let divvyTitle = $state('');
@@ -28,18 +32,18 @@
     let memberNameInput: HTMLInputElement;
 
     $effect(() => {
-        const total = Number(Math.round((expenses.reduce((acc, expense) => acc + expense.expAmount, 0)) * 100) / 100);
+        const total = Number(Math.round((expenses.reduce((acc, expense) => acc + expense.amount, 0)) * 100) / 100);
         const splitTotal = members.length > 0 ? Math.ceil(total / members.length * 100) / 100 : 0;
-        splitResults = {total, splitTotal, splitMembersCount: members.length};
+        splitResults = {...splitResults, total, splitTotal};
     })
 
     function handleSaveExpense(event: Event) {
         event.preventDefault();
         if (expenseName && expenseAmountString) {
             expenses.push({
-                expId: crypto.randomUUID(),
-                expName: expenseName,
-                expAmount: parseFloat(expenseAmountString)
+                id: crypto.randomUUID(),
+                title: expenseName,
+                amount: parseFloat(expenseAmountString)
             });
             toasts.success(`${expenseName} added as expense`);
             expenseName = '';
@@ -49,15 +53,15 @@
     }
 
     function handleDeleteExpense(expenseId: string) {
-        expenses = expenses.filter(expense => expense.expId !== expenseId);
+        expenses = expenses.filter(expense => expense.id !== expenseId);
     }
 
     function handleSaveMember(event: Event) {
         event.preventDefault()
         if (memberName.trim()) {
             members.push({
-                memId: crypto.randomUUID(),
-                memName: memberName
+                id: crypto.randomUUID(),
+                name: memberName
             })
             toasts.success(`${memberName} added as member`);
             memberName = '';
@@ -66,7 +70,7 @@
     }
 
     function handleDeleteMember(memberId: string) {
-        members = members.filter(member => member.memId !== memberId);
+        members = members.filter(member => member.id !== memberId);
     }
 
     function verifyDivvyTitle(): boolean {
@@ -78,6 +82,41 @@
             divvyTitleInput.classList.add('border-rose-400');
             return false;
         }
+    }
+
+    function exportReport() {
+        const reportText = getSplitReportText();
+        const blob = new Blob([reportText], {type: "text/plain;charset=utf-8"});
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${divvyTitle.trim()}_report.txt`;
+        link.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function getSplitReportText(): string {
+        const date = new Date();
+        let reportText = `${divvyTitle.trim().toUpperCase()} REPORT\n`;
+        reportText += date.toLocaleDateString() + " " + date.toLocaleTimeString() + "\n";
+        reportText += "==================================================\n";
+        reportText += `EXPENSES\n`;
+        reportText += "+------------------------------------------------+\n";
+        expenses.forEach(expense => {
+            reportText += `${expense.title} - $${expense.amount}\n`;
+        });
+        reportText += `---- TOTAL: $${splitResults.total}\n`;
+        reportText += "+------------------------------------------------+\n";
+        reportText += `MEMBERS\n`;
+        reportText += "+------------------------------------------------+\n";
+        members.forEach(member => {
+            reportText += `${member.name}\n`;
+        });
+        reportText += `---- SPLIT MEMBERS COUNT: ${splitResults.members.length}\n`;
+        reportText += "+------------------------------------------------+\n";
+        reportText += `---- SPLIT TOTAL PER MEMBER: $${splitResults.splitTotal}\n`;
+        reportText += "==================================================\n";
+        return reportText;
     }
 </script>
 
@@ -124,11 +163,11 @@
         </div>
         {#if expensesListShowing}
             <ul class="flex flex-col gap-y-2 overflow-y-auto">
-                {#each expenses as expense, index (expense.expId)}
+                {#each expenses as expense, index (expense.id)}
                     <li class="list-item gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
-                        <span class="text-sm">{expense.expName}</span>
-                        <span class="text-sm ml-auto">${expense.expAmount}</span>
-                        <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4 btn-trash">
+                        <span class="text-sm">{expense.title}</span>
+                        <span class="text-sm ml-auto">${expense.amount}</span>
+                        <button onclick={() => handleDeleteExpense(expense.id)} class="ml-4 btn-trash">
                             <TrashIcon class="text-lg"/>
                         </button>
                     </li>
@@ -137,10 +176,10 @@
         {/if}
         {#if membersListShowing}
             <ul class="flex flex-col gap-y-2">
-                {#each members as member, index (member.memId)}
+                {#each members as member, index (member.id)}
                     <li class="list-item justify-between gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
-                        <span class="text-sm">{member.memName}</span>
-                        <button onclick={() => handleDeleteMember(member.memId)} class="btn-trash">
+                        <span class="text-sm">{member.name}</span>
+                        <button onclick={() => handleDeleteMember(member.id)} class="btn-trash">
                             <TrashIcon class="text-lg"/>
                         </button>
                     </li>
@@ -150,21 +189,21 @@
     </div>
     <div class="hidden lg:grid grid-cols-2 gap-x-8">
         <ul class="flex flex-col gap-y-2">
-            {#each expenses as expense, index (expense.expId)}
+            {#each expenses as expense, index (expense.id)}
                 <li class="list-item gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
-                    <span class="text-sm">{expense.expName}</span>
-                    <span class="text-sm ml-auto">${expense.expAmount}</span>
-                    <button onclick={() => handleDeleteExpense(expense.expId)} class="ml-4 btn-trash">
+                    <span class="text-sm">{expense.title}</span>
+                    <span class="text-sm ml-auto">${expense.amount}</span>
+                    <button onclick={() => handleDeleteExpense(expense.id)} class="ml-4 btn-trash">
                         <TrashIcon class="text-lg"/>
                     </button>
                 </li>
             {/each}
         </ul>
         <ul class="flex flex-col gap-y-2">
-            {#each members as member, index (member.memId)}
+            {#each members as member, index (member.id)}
                 <li class="list-item justify-between gap-x-2 items-center" style="animation-delay: {index * 0.1}s;">
-                    <span class="text-sm">{member.memName}</span>
-                    <button onclick={() => handleDeleteMember(member.memId)} class="btn-trash">
+                    <span class="text-sm">{member.name}</span>
+                    <button onclick={() => handleDeleteMember(member.id)} class="btn-trash">
                         <TrashIcon class="text-lg"/>
                     </button>
                 </li>
@@ -233,13 +272,13 @@
             <small>Final report</small>
             <div>
                 <p class="text-lime text-7xl tracking-tight">${splitResults.splitTotal}</p>
-                <small>Expenses total: ${splitResults.total} / Total members: {splitResults.splitMembersCount}</small>
+                <small>Expenses total: ${splitResults.total} / Total members: {splitResults.members.length}</small>
             </div>
         </div>
     {/snippet}
     {#snippet footer()}
-        <div class="mt-4 flex justify-end gap-4">
-            <button class="btn btn-primary-outline">Download results</button>
+        <div class="mt-8 grid grid-cols-2 gap-x-4">
+            <button onclick={() => exportReport()} class="btn btn-primary-outline">Download results</button>
             <button class="btn btn-primary">Save results</button>
         </div>
     {/snippet}
